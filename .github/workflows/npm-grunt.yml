@@ -1,0 +1,43 @@
+name: NodeJS with Grunt
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Build
+      run: |
+        npm install
+        grunt
+7xpN3j3EzTgtfB7Q4AzyrWRkg5uhsdTxu7GL1PfPGukf-- Create likes table for posts
+CREATE TABLE public.post_likes (
+  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  post_id BIGINT NOT NULL REFERENCES public.posts(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(post_id, user_id)
+);
+
+-- Create indexes for faster joins
+CREATE INDEX idx_post_likes_post_id ON public.post_likes(post_id);
+CREATE INDEX idx_post_likes_user_id ON public.post_likes(user_id);
+
+-- Enable RLS on post_likes
+ALTER TABLE public.post_likes ENABLE ROW LEVEL SECURITY;
